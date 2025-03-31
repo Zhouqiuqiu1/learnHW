@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+void main() {
+  runApp(CardRevenueApp());
+}
+
+class CardRevenueApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '打牌营收记录',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: CardRevenueTracker(),
+    );
+  }
+}
+
+class CardRevenueTracker extends StatefulWidget {
+  @override
+  _CardRevenueTrackerState createState() => _CardRevenueTrackerState();
+}
+
+class _CardRevenueTrackerState extends State<CardRevenueTracker> {
+  List<Map<String, dynamic>> data = [];
+  final amountController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('打牌营收记录'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('日期: ${DateFormat('yyyy-MM-dd').format(DateTime.now())}'),
+            TextField(
+              controller: amountController,
+              decoration: InputDecoration(
+                hintText: '赢/输金额',
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: recordRevenue,
+              child: Text('记录'),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: viewTotalData,
+              child: Text('查看总数据'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void recordRevenue() {
+    try {
+      double amount = double.parse(amountController.text);
+      String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      setState(() {
+        data.add({'date': currentDate, 'amount': amount});
+      });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('记录成功'),
+            content: Text('$currentDate 记录 $amount 元 成功！'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  amountController.clear();
+                },
+                child: Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('输入错误'),
+            content: Text('请输入有效的数字金额！'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void viewTotalData() {
+    String totalText = '日期\t\t金额\n';
+    double totalAmount = 0;
+    for (var item in data) {
+      totalText += '${item['date']}\t${item['amount']}\n';
+      totalAmount += item['amount'];
+    }
+    totalText += '\n总金额: $totalAmount';
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('总数据'),
+          content: SingleChildScrollView(
+            child: Text(totalText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}    
