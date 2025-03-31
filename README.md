@@ -1,2 +1,0 @@
-# learnHW
-day day up
